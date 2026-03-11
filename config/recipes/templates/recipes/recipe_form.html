@@ -1,0 +1,24 @@
+{% extends "recipes/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container">
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset class="form-group">
+      <legend class="border-bottom mb-4">Aggiungi Ricetta</legend>
+      {% for field in form %}
+        {{ field|as_crispy_field }}
+        {% if field.name == 'tags' %}
+          <small class="form-text text-muted">Per i tag, inserisci una o più parole separate da virgola (es: ["carbonara", "pasta", "italiana"])</small>
+        {% endif %}
+      {% endfor %}
+    </fieldset>
+    <div class="form-group py-3">
+      <input class="btn btn-outline-primary" type="submit" value="Save" />
+    </div>
+  </form>
+  <div class="border-top pt-3">
+    <a class="text-muted" href="{% url 'recipes-home' %}">Cancel</a>
+  </div>
+</div>
+{% endblock content %}

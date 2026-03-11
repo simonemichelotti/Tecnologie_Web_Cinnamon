@@ -1,0 +1,13 @@
+{% extends "recipes/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3>Aggiungi un commento a {{ recipe.title }}</h3>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Invia</button>
+    <a href="{% url 'recipes-detail' recipe.pk %}" class="btn btn-secondary ms-2">Annulla</a>
+  </form>
+</div>
+{% endblock %}
