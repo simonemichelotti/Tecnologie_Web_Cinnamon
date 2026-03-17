@@ -1,0 +1,161 @@
+{% extends "recipes/base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-inbox"></i> Richieste Ricevute
+            {% if received_requests %}
+              <span class="badge bg-light text-primary">{{ received_requests|length }}</span>
+            {% endif %}
+          </h5>
+        </div>
+        <div class="card-body">
+          {% for request in received_requests %}
+          <div class="d-flex align-items-center mb-3 p-3 border rounded">
+            {% if request.from_user.userprofile.profile_image %}
+              <img src="{{ request.from_user.userprofile.profile_image.url }}" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+            {% else %}
+              <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                <i class="fas fa-user text-white"></i>
+              </div>
+            {% endif %}
+            
+            <div class="flex-grow-1">
+              <h6 class="mb-1">
+                <a href="{% url 'user-public-profile' request.from_user.username %}" class="text-decoration-none">
+                  {{ request.from_user.get_full_name|default:request.from_user.username }}
+                </a>
+              </h6>
+              <p class="text-muted small mb-1">@{{ request.from_user.username }}</p>
+              {% if request.message %}
+                <p class="small mb-2">"{{ request.message }}"</p>
+              {% endif %}
+              <small class="text-muted">{{ request.created_at|timesince }} fa</small>
+            </div>
+            
+            <div class="ms-auto">
+              <div class="d-grid gap-1" style="width: 80px;">
+                <form method="POST" action="{% url 'user-accept-friend-request' request.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-xs btn-success btn-sm w-100" type="submit" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                    <i class="fas fa-check"></i> OK
+                  </button>
+                </form>
+                <form method="POST" action="{% url 'user-reject-friend-request' request.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-xs btn-outline-danger btn-sm w-100" type="submit" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                    <i class="fas fa-times"></i> NO
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-center py-4">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h6 class="text-muted">Nessuna richiesta ricevuta</h6>
+            <p class="text-muted small">Quando qualcuno ti invierà una richiesta di amicizia, apparirà qui.</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-paper-plane"></i> Richieste Inviate
+            {% if sent_requests %}
+              <span class="badge bg-light text-secondary">{{ sent_requests|length }}</span>
+            {% endif %}
+          </h5>
+        </div>
+        <div class="card-body">
+          {% for request in sent_requests %}
+          <div class="d-flex align-items-center mb-3 p-3 border rounded">
+            {% if request.to_user.userprofile.profile_image %}
+              <img src="{{ request.to_user.userprofile.profile_image.url }}" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+            {% else %}
+              <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                <i class="fas fa-user text-white"></i>
+              </div>
+            {% endif %}
+            
+            <div class="flex-grow-1">
+              <h6 class="mb-1">
+                <a href="{% url 'user-public-profile' request.to_user.username %}" class="text-decoration-none">
+                  {{ request.to_user.get_full_name|default:request.to_user.username }}
+                </a>
+              </h6>
+              <p class="text-muted small mb-1">@{{ request.to_user.username }}</p>
+              {% if request.message %}
+                <p class="small mb-2">"{{ request.message }}"</p>
+              {% endif %}
+              <small class="text-muted">Inviata {{ request.created_at|timesince }} fa</small>
+            </div>
+            
+            <div class="ms-auto">
+              <span class="badge bg-warning">
+                <i class="fas fa-clock"></i> In Attesa
+              </span>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-center py-4">
+            <i class="fas fa-paper-plane fa-3x text-muted mb-3"></i>
+            <h6 class="text-muted">Nessuna richiesta inviata</h6>
+            <p class="text-muted small">
+              <a href="{% url 'user-search' %}" class="text-decoration-none">Cerca utenti</a> per iniziare a fare amicizia!
+            </p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Suggerimenti -->
+  <div class="row mt-4">
+    <div class="col-md-12">
+      <div class="card border-info">
+        <div class="card-header bg-info text-white">
+          <h6 class="mb-0"><i class="fas fa-lightbulb"></i> Suggerimenti</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="text-center">
+                <i class="fas fa-search fa-2x text-info mb-2"></i>
+                <h6>Trova Nuovi Amici</h6>
+                <p class="small text-muted">Usa la ricerca per trovare utenti con interessi simili ai tuoi.</p>
+                <a href="{% url 'user-search' %}" class="btn btn-sm btn-outline-info">Cerca Utenti</a>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <i class="fas fa-users fa-2x text-success mb-2"></i>
+                <h6>I Tuoi Amici</h6>
+                <p class="small text-muted">Vedi la lista completa dei tuoi amici su Cinnamon.</p>
+                <a href="{% url 'user-friends' %}" class="btn btn-sm btn-outline-success">Lista Amici</a>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <i class="fas fa-utensils fa-2x text-warning mb-2"></i>
+                <h6>Condividi Ricette</h6>
+                <p class="small text-muted">Aggiungi nuove ricette per condividerle con i tuoi amici.</p>
+                <a href="{% url 'recipes-create' %}" class="btn btn-sm btn-outline-warning">Aggiungi Ricetta</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

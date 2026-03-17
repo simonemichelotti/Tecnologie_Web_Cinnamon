@@ -1,0 +1,26 @@
+{% extends "recipes/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card border-warning">
+        <div class="card-body text-center">
+          <h2 class="text-warning mb-3"><i class="fas fa-lock"></i> Community Privata</h2>
+          <p class="lead">Questa community è privata. Puoi accedervi solo se sei amico del gestore, membro o moderatore.</p>
+          <hr>
+          {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'community-request-access' community.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-warning btn-lg"><i class="fas fa-paper-plane"></i> Richiedi Accesso</button>
+            </form>
+            <p class="mt-3 text-muted">La tua richiesta sarà valutata dal gestore.</p>
+          {% else %}
+            <a href="{% url 'user-login' %}" class="btn btn-primary btn-lg"><i class="fas fa-sign-in-alt"></i> Accedi per richiedere l'accesso</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "recipes/base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <!-- Header Conversazione -->
+      <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="fas fa-comments"></i> {{ title }}
+            </h5>
+            <a href="{% url 'messages-inbox' %}" class="btn btn-light btn-sm">
+              <i class="fas fa-arrow-left"></i> Torna ai Messaggi
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenitore Chat -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card" style="height: 600px;">
+            <!-- Area Messaggi -->
+            <div class="card-body" style="height: 500px; overflow-y: auto;" id="chat-messages">
+              {% for message in chat_messages %}
+                <div class="d-flex mb-3 {% if message.sender == user %}justify-content-end{% endif %}">
+                  <div class="{% if message.sender == user %}order-2{% endif %}">
+                    {% if message.sender.userprofile.profile_image %}
+                      <img src="{{ message.sender.userprofile.profile_image.url }}" 
+                           alt="{{ message.sender.username }}" 
+                           class="rounded-circle" 
+                           style="width: 40px; height: 40px; object-fit: cover;">
+                    {% else %}
+                      <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" 
+                           style="width: 40px; height: 40px;">
+                        <i class="fas fa-user text-white"></i>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="{% if message.sender == user %}order-1 mr-3{% else %}ml-3{% endif %} flex-grow-1">
+                    <div class="p-3 rounded {% if message.sender == user %}bg-primary text-white ml-5{% else %}bg-light mr-5{% endif %}">
+                      <div class="mb-1">
+                        <strong>
+                          {% if message.sender == user %}
+                            Tu
+                          {% else %}
+                            {{ message.sender.get_full_name|default:message.sender.username }}
+                          {% endif %}
+                        </strong>
+                        <small class="{% if message.sender == user %}text-light{% else %}text-muted{% endif %} ml-2">
+                          {{ message.created_at|date:"d M H:i" }}
+                        </small>
+                      </div>
+                      <p class="mb-0">{{ message.content|linebreaks }}</p>
+                    </div>
+                  </div>
+                </div>
+              {% empty %}
+              <p>Nessun messaggio.</p>
+              {% endfor %}
+            </div>
+            <!-- Form invio messaggio -->
+            <div class="card-footer">
+              <form method="post">
+                {% csrf_token %}
+                <div class="input-group">
+                  <input type="text" name="content" class="form-control" placeholder="Scrivi un messaggio...">
+                  <button type="submit" class="btn btn-primary">Invia</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

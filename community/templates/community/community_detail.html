@@ -1,0 +1,135 @@
+{% extends "recipes/base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Titolo Community in box blu -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card bg-primary text-white" style="max-width: 700px; margin: 0 auto;">
+        <div class="card-body text-center">
+          <h1 class="card-title mb-2">
+            <i class="fas fa-users me-2"></i> {{ community.name }}
+            {% if community.visibility == 'private' %}
+              <span class="badge badge-warning ms-2 mb-2">
+                <i class="fas fa-lock me-1"></i> Privata
+              </span>
+            {% endif %}
+          </h1>
+          <p class="card-text lead mb-3">{{ community.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout principale -->
+  <div class="row">
+    <!-- Colonna sinistra: Condividi e Discussioni -->
+    <div class="col-lg-8">
+      {% if is_member %}
+      <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-plus"></i> Condividi qualcosa con la community</div>
+        <div class="card-body">
+          <form method="POST" action="{% url 'community-create-post' community.pk %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <input type="text" name="title" class="form-control" placeholder="Titolo del post (opzionale)">
+            </div>
+            <div class="mb-3">
+              <textarea name="content" class="form-control" rows="3" placeholder="Cosa vuoi condividere con la community?" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Pubblica</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+      <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-comments"></i> Discussioni della Community</div>
+        <div class="card-body">
+          {% if posts %}
+            {% for post in posts %}
+            <div class="card mb-3">
+              <div class="card-header">
+                <strong>{{ post.author.username }}</strong>
+                {% if post.author == community.creator %} <span class="badge bg-warning">MOD</span> {% endif %}
+                <span class="text-muted">{{ post.created_at|timesince }} fa</span>
+              </div>
+              <div class="card-body">
+                <h5>{{ post.title }}</h5>
+                <p>{{ post.content }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted">Nessuna discussione ancora.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonna destra: Info, Moderatori, Azioni -->
+    <div class="col-lg-4">
+      <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-info-circle"></i> Info Community</div>
+        <div class="card-body text-center">
+          <div class="mb-2">
+            <span class="h4 text-primary">{{ community.members.count }}</span> <span>Membri</span>
+            <span class="h4 text-success ms-4">{{ community.posts.count }}</span> <span>Post</span>
+          </div>
+          <hr>
+          <div class="mb-2"><strong>Creatore:</strong> {{ community.creator.username }}</div>
+          <div class="mb-2"><strong>Creata:</strong> {{ community.created_at|date:'d F Y' }}</div>
+          <div class="mb-2"><strong>Tipo:</strong> {{ community.get_visibility_display }}</div>
+        </div>
+      </div>
+      <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-shield-alt"></i> Moderatori</div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">{{ community.creator.username }}</li>
+            {% for mod in community.moderators.all %}
+              {% if mod != community.creator %}
+                <li class="list-group-item">{{ mod.username }}</li>
+              {% endif %}
+            {% empty %}
+              <li class="list-group-item text-muted">Nessun altro moderatore</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-tools"></i> Azioni</div>
+        <div class="card-body text-center">
+          {% if user.is_authenticated %}
+            {% if is_member %}
+              <a href="{% url 'community-leave' community.pk %}" class="btn btn-outline-primary mb-2"><i class="fas fa-sign-out-alt"></i> Lascia Community</a><br>
+            {% elif community.visibility == 'private' %}
+              {# Community privata: mostra solo "Richiedi accesso", NON "Unisciti" #}
+              <form method="POST" action="{% url 'community-request-access' community.pk %}" class="mb-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning"><i class="fas fa-user-clock"></i> Richiedi accesso</button>
+              </form>
+            {% else %}
+              {# Community pubblica: mostra "Unisciti" #}
+              <a href="{% url 'community-join' community.pk %}" class="btn btn-primary mb-2"><i class="fas fa-user-plus"></i> Unisciti</a><br>
+            {% endif %}
+            {% if is_moderator %}
+              <a href="{% url 'community-manage' community.pk %}" class="btn btn-warning mb-2"><i class="fas fa-cogs"></i> Gestisci</a><br>
+              <a href="{% url 'community-manage-members' community.pk %}" class="btn btn-info mb-2"><i class="fas fa-users-cog"></i> Gestisci Membri</a><br>
+              <a href="{% url 'community-send-invite' community.pk %}" class="btn btn-success mb-2"><i class="fas fa-user-plus"></i> Invita Amici</a><br>
+            {% endif %}
+            <a href="{% url 'community-received-invites' %}" class="btn btn-secondary mb-2">
+              <i class="fas fa-envelope"></i> Inviti Ricevuti
+              {% if invites_count > 0 %}
+                <span class="badge bg-danger ms-1">{{ invites_count }}</span>
+              {% endif %}
+            </a><br>
+          {% else %}
+            <a href="{% url 'user-login' %}" class="btn btn-primary mb-2"><i class="fas fa-sign-in-alt"></i> Accedi per Unirti</a><br>
+          {% endif %}
+          <a href="{% url 'community-list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Torna alle Community</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

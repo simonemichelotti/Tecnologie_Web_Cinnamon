@@ -1,0 +1,35 @@
+{% extends "recipes/base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card border-warning">
+        <div class="card-body">
+          <h2 class="text-warning mb-3"><i class="fas fa-envelope"></i> Inviti ricevuti</h2>
+          {% if invites %}
+            <ul class="list-group mb-4">
+              {% for invite in invites %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span>
+                    <strong>{{ invite.community.name }}</strong> <br>
+                    Invitato da <strong>{{ invite.from_user.username }}</strong>
+                  </span>
+                  <form method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="invite_id" value="{{ invite.id }}">
+                    <button type="submit" name="action" value="accept" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Accetta</button>
+                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Rifiuta</button>
+                  </form>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">Nessun invito ricevuto.</p>
+          {% endif %}
+          <a href="{% url 'user-profile' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Torna al profilo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

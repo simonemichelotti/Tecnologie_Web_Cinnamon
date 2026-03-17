@@ -1,0 +1,74 @@
+{% extends "recipes/base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <h1 class="mb-0"><i class="fas fa-envelope text-primary"></i> I Tuoi Messaggi</h1>
+        <a href="{% url 'recipes-home' %}" class="btn btn-light btn-sm ms-3">
+          <i class="fas fa-arrow-left"></i> Torna alla Home
+        </a>
+      </div>
+      <hr>
+    </div>
+  </div>
+
+  {% if conversations %}
+    <div class="row">
+      {% for conversation, other_user in conversations %}
+          
+          <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  {% load users_extras %}
+                  {% if unread_counts and unread_counts|dict_get:conversation.id > 0 %}
+                    <span class="badge bg-danger ms-2">{{ unread_counts|dict_get:conversation.id }} nuovo/i</span>
+                  {% endif %}
+                  <div class="flex-shrink-0">
+                    {% if other_user.userprofile.profile_image %}
+                      <img src="{{ other_user.userprofile.profile_image.url }}" 
+                           alt="{{ other_user.username }}" 
+                           class="rounded-circle" 
+                           style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                      <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" 
+                           style="width: 50px; height: 50px;">
+                        <i class="fas fa-user text-white"></i>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <h5 class="mb-1">{{ other_user.get_full_name|default:other_user.username }}</h5>
+                    <p class="mb-1 text-muted small">
+                      {% if conversation.messages.last %}
+                        {{ conversation.messages.last.content|truncatewords:8 }}
+                      {% else %}
+                        Nessun messaggio ancora
+                      {% endif %}
+                    </p>
+                    <small class="text-muted">
+                      {% if conversation.last_message_time %}
+                        {{ conversation.last_message_time|timesince }} fa
+                      {% endif %}
+                    </small>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer bg-light">
+                <a href="{% url 'conversation-detail' conversation.id %}" class="btn btn-primary btn-sm">Vai alla chat</a>
+              </div>
+            </div>
+          </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="row">
+      <div class="col-12">
+        <p>Nessuna conversazione trovata.</p>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

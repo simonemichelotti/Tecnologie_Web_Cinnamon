@@ -1,0 +1,171 @@
+{% extends "recipes/base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+      <h2 class="mb-0"><i class="fas fa-users"></i> I Tuoi Amici</h2>
+      <a href="{% url 'recipes-home' %}" class="btn btn-light btn-sm ms-3">
+        <i class="fas fa-arrow-left"></i> Torna alla Home
+      </a>
+    </div>
+    <a href="{% url 'user-search' %}" class="btn btn-primary">
+      <i class="fas fa-user-plus"></i> Trova Nuovi Amici
+    </a>
+  </div>
+  
+  {% if friends %}
+    <div class="row">
+      {% for friend in friends %}
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              {% if friend.userprofile.profile_image %}
+                <img src="{{ friend.userprofile.profile_image.url }}" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+              {% else %}
+                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                  <i class="fas fa-user text-white"></i>
+                </div>
+              {% endif %}
+              <div>
+                <h6 class="card-title mb-0">{{ friend.get_full_name|default:friend.username }}</h6>
+                <small class="text-muted">@{{ friend.username }}</small>
+              </div>
+            </div>
+            
+            {% if friend.userprofile.bio %}
+              <p class="card-text small">{{ friend.userprofile.bio|truncatewords:15 }}</p>
+            {% endif %}
+            
+            <div class="mb-2">
+              <span class="badge bg-info">{{ friend.userprofile.get_experience_level_display }}</span>
+              {% if friend.userprofile.location %}
+                <span class="badge bg-secondary">
+                  <i class="fas fa-map-marker-alt"></i> {{ friend.userprofile.location }}
+                </span>
+              {% endif %}
+            </div>
+            
+            {% if friend.userprofile.get_specialties_display %}
+              <div class="mb-3">
+                {% for specialty in friend.userprofile.get_specialties_display|slice:":2" %}
+                  <span class="badge bg-success small">{{ specialty }}</span>
+                {% endfor %}
+                {% if friend.userprofile.get_specialties_display|length > 2 %}
+                  <span class="badge bg-light text-dark small">+{{ friend.userprofile.get_specialties_display|length|add:"-2" }}</span>
+                {% endif %}
+              </div>
+            {% endif %}
+            
+            <div class="row text-center mb-3">
+              <div class="col-4">
+                <small class="text-muted">Ricette</small>
+                <div class="fw-bold">{{ friend.userprofile.total_recipes }}</div>
+              </div>
+              <div class="col-4">
+                <small class="text-muted">Like</small>
+                <div class="fw-bold">{{ friend.userprofile.total_likes_received }}</div>
+              </div>
+              <div class="col-4">
+                <small class="text-muted">Amici</small>
+                <div class="fw-bold">{{ friend.userprofile.friends_count }}</div>
+              </div>
+            </div>
+            
+            <div class="d-flex gap-2">
+              <a href="{% url 'user-public-profile' friend.username %}" class="btn btn-sm btn-outline-primary flex-fill">
+                <i class="fas fa-eye"></i> Profilo
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- Statistiche amici -->
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card bg-light">
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-md-3">
+                <div class="h4 text-primary">{{ friends|length }}</div>
+                <div class="text-muted">Amici Totali</div>
+              </div>
+              <div class="col-md-3">
+                <div class="h4 text-success">{% widthratio friends|length 1 100 %}%</div>
+                <div class="text-muted">Crescita Social</div>
+              </div>
+              <div class="col-md-3">
+                <div class="h4 text-warning">
+                  {% for friend in friends %}{{ friend.userprofile.total_recipes|add:0 }}{% endfor %}
+                </div>
+                <div class="text-muted">Ricette Condivise</div>
+              </div>
+              <div class="col-md-3">
+                <div class="h4 text-info">{{ pending_friend_requests|default:0 }}</div>
+                <div class="text-muted">Richieste Pendenti</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  {% else %}
+    <!-- Empty state -->
+    <div class="text-center py-5">
+      <i class="fas fa-users fa-5x text-muted mb-4"></i>
+      <h3 class="text-muted">Non hai ancora amici su Cinnamon</h3>
+      <p class="text-muted mb-4">Inizia a costruire la tua rete culinaria! Cerca altri appassionati di cucina e inizia a condividere le tue ricette.</p>
+      
+      <div class="d-flex justify-content-center gap-3">
+        <a href="{% url 'user-search' %}" class="btn btn-primary">
+          <i class="fas fa-search"></i> Cerca Utenti
+        </a>
+        <a href="{% url 'recipes-create' %}" class="btn btn-outline-primary">
+          <i class="fas fa-plus"></i> Condividi una Ricetta
+        </a>
+      </div>
+      
+      <div class="mt-4">
+        <h5>Consigli per iniziare:</h5>
+        <div class="row mt-3">
+          <div class="col-md-4">
+            <div class="card border-0">
+              <div class="card-body text-center">
+                <i class="fas fa-user-edit fa-2x text-primary mb-3"></i>
+                <h6>Completa il tuo profilo</h6>
+                <p class="small text-muted">Aggiungi biografia, foto e specialità culinarie</p>
+                <a href="{% url 'user-profile' %}" class="btn btn-sm btn-outline-primary">Modifica Profilo</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0">
+              <div class="card-body text-center">
+                <i class="fas fa-utensils fa-2x text-success mb-3"></i>
+                <h6>Condividi ricette</h6>
+                <p class="small text-muted">Le tue ricette attireranno utenti con interessi simili</p>
+                <a href="{% url 'recipes-create' %}" class="btn btn-sm btn-outline-success">Aggiungi Ricetta</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card border-0">
+              <div class="card-body text-center">
+                <i class="fas fa-heart fa-2x text-danger mb-3"></i>
+                <h6>Interagisci con altri</h6>
+                <p class="small text-muted">Metti like e commenta le ricette degli altri</p>
+                <a href="{% url 'recipes-home' %}" class="btn btn-sm btn-outline-danger">Esplora Ricette</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock content %}

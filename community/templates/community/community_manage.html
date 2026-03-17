@@ -1,0 +1,94 @@
+{% extends "recipes/base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header Gestione -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-cogs text-warning"></i> Gestione Community: {{ community.name }}</h1>
+        <a href="{% url 'community-detail' community.pk %}" class="btn btn-secondary">
+          <i class="fas fa-arrow-left"></i> Torna alla Community
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Statistiche -->
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5><i class="fas fa-chart-bar"></i> Statistiche</h5>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-6">
+              <h3 class="text-primary">{{ member_count }}</h3>
+              <small>Membri</small>
+            </div>
+            <div class="col-6">
+              <h3 class="text-success">{{ post_count }}</h3>
+              <small>Post Totali</small>
+            </div>
+          </div>
+
+          <hr>
+          <div class="text-center">
+            <h4 class="text-danger">{{ pending_requests_count }}</h4>
+            <small>Richieste di Accesso in Attesa</small>
+            {% if pending_requests_count > 0 %}
+              <br>
+              <a href="{% url 'community-manage-requests' community.pk %}" class="btn btn-danger btn-sm mt-2">
+                <i class="fas fa-user-clock"></i> Gestisci Richieste
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impostazioni Community (Creatore e Moderatori) -->
+    {% if is_creator or is_moderator %}
+      <div class="col-md-8 mb-4">
+        <div class="card">
+          <div class="card-header bg-warning">
+            <h5><i class="fas fa-crown"></i> Impostazioni Community (Solo Creatore)</h5>
+          </div>
+          <div class="card-body">
+            <form method="POST" action="{% url 'community-update-settings' community.pk %}">
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="name">Nome Community</label>
+                    <input type="text" class="form-control" name="name" value="{{ community.name }}" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="description">Descrizione</label>
+                    <textarea class="form-control" name="description" required>{{ community.description }}</textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="visibility">Visibilità</label>
+                    <select class="form-control" name="visibility" required>
+                      <option value="public" {% if community.visibility == 'public' %}selected{% endif %}>Pubblica</option>
+                      <option value="private" {% if community.visibility == 'private' %}selected{% endif %}>Privata</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-12 text-end">
+                  <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Salva</button>
+                </div>
+              </div>
+          </div>
+        </div>
+    {% endif %}
+    {% endblock %}

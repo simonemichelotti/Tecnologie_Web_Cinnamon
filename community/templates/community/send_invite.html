@@ -1,0 +1,31 @@
+{% extends "recipes/base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card border-success">
+        <div class="card-body">
+          <h2 class="text-success mb-3"><i class="fas fa-user-plus"></i> Invita un amico nella community</h2>
+          {% if friends %}
+            <form method="POST">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="friend_id" class="form-label">Seleziona un amico:</label>
+                <select name="friend_id" id="friend_id" class="form-select">
+                  {% for friend in friends %}
+                    <option value="{{ friend.id }}">{{ friend.username }} ({{ friend.get_full_name|default:friend.username }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane"></i> Invia Invito</button>
+            </form>
+          {% else %}
+            <p class="text-muted">Non hai amici da invitare.</p>
+          {% endif %}
+          <a href="{% url 'community-detail' community.pk %}" class="btn btn-secondary mt-3"><i class="fas fa-arrow-left"></i> Torna alla Community</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

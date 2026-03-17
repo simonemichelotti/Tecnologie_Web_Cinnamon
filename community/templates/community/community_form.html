@@ -1,0 +1,58 @@
+{% extends "recipes/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h3><i class="fas fa-plus"></i> Crea Nuova Community</h3>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="id_name">Nome Community</label>
+              <input type="text" 
+                     class="form-control" 
+                     id="id_name" 
+                     name="name" 
+                     placeholder="Es: Cucina Italiana, Dolci Fatti in Casa..."
+                     required>
+            </div>
+            
+            <div class="form-group">
+              <label for="id_description">Descrizione</label>
+              <textarea class="form-control" 
+                        id="id_description" 
+                        name="description" 
+                        rows="4" 
+                        placeholder="Descrivi la tua community, gli argomenti di discussione e cosa possono aspettarsi i membri..."
+                        required></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="id_visibility">Tipo di Community</label>
+              <select class="form-control" id="id_visibility" name="visibility">
+                <option value="public">Pubblica - Tutti possono unirsi</option>
+                <option value="private">Privata - Solo su invito</option>
+              </select>
+              <small class="text-muted">Le community private richiedono un invito da parte dei moderatori</small>
+            </div>
+            
+            <div class="form-group text-center">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-rocket"></i> Crea Community
+              </button>
+              <a href="{% url 'community-list' %}" class="btn btn-secondary btn-lg ml-2">
+                <i class="fas fa-arrow-left"></i> Annulla
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
